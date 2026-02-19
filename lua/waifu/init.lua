@@ -78,15 +78,21 @@ function M.setup(user_cfg)
     display.close()
   end, { desc = "Hide the waifu mood window" })
 
-  -- Initial render after Neovim has fully started (avoids startup race)
-  vim.api.nvim_create_autocmd("VimEnter", {
-    group = group,
-    once  = true,
-    callback = function()
-      -- Small delay lets LSP attach and fire its first diagnostics
-      vim.defer_fn(do_update, 500)
-    end,
-  })
+  -- Initial render.
+  -- When loaded with 'VeryLazy' or similar, VimEnter has already fired,
+  -- so vim.v.vim_did_enter == 1 and we show immediately instead of waiting.
+  if vim.v.vim_did_enter == 1 then
+    vim.defer_fn(do_update, 100)
+  else
+    vim.api.nvim_create_autocmd("VimEnter", {
+      group = group,
+      once  = true,
+      callback = function()
+        -- Small delay lets LSP attach and send its first diagnostics
+        vim.defer_fn(do_update, 500)
+      end,
+    })
+  end
 end
 
 return M
