@@ -3,19 +3,21 @@
 A mood-reactive waifu overlay for Neovim. Your mascot gets happier as your code gets cleaner.
 
 ```
-    ≋≋≋≋≋≋≋≋≋≋≋≋≋≋≋
-  ╭─────────────────╮
-  │  ╲──      ──╱  │
-  │  (ò  ) (  ó)   │
-  │       ▾         │
-  │   ╭─────────╮   │
-  │   │ !! !!   │   │
-  ╰─────────────────╯
-        │     │
-     ───┴─────┴───
-   !! 11+ ERRORS !!
-   "FIX IT NOW!!"
-    !! !! !! !!
+  ╲ /\_____/\ ╱
+   (  >   <  )
+  ( (ò) 益 (ó) )
+   \  ╭─┴─╮  /
+    ╰───────╯
+  ╭──╮     ╭──╮
+ >│  ╰─────╯  │<
+  │  !!   !!  │
+  ╰─────┬─────╯
+       ╱ ╲
+      ╱   ╲
+
+  !! 11+ ERRORS !!
+  "FIX IT NOW!!"
+   !! !! !! !!
 ```
 
 Mood levels driven by LSP / diagnostic error count:
