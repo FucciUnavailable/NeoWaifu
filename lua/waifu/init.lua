@@ -11,6 +11,7 @@ local M = {}
 local defaults  = require("waifu.config").defaults
 local display   = require("waifu.display")
 local diags     = require("waifu.diagnostics")
+local winterm   = require("waifu.winterm")
 
 local _cfg   = {}
 local _timer = nil   -- uv timer for debouncing
@@ -20,6 +21,7 @@ local _timer = nil   -- uv timer for debouncing
 local function do_update()
   local mood, count = diags.get_mood(_cfg)
   display.update(mood, count)
+  winterm.set_mood(mood)
 end
 
 -- Debounced wrapper – collapses rapid diagnostic bursts into a single render.
@@ -43,6 +45,7 @@ function M.setup(user_cfg)
   _cfg = vim.tbl_deep_extend("force", defaults, user_cfg or {})
 
   display.setup(_cfg)
+  winterm.setup(_cfg)
 
   local group = vim.api.nvim_create_augroup("WaifuMood", { clear = true })
 
@@ -77,6 +80,19 @@ function M.setup(user_cfg)
   vim.api.nvim_create_user_command("WaifuHide", function()
     display.close()
   end, { desc = "Hide the waifu mood window" })
+
+  -- :WaifuBgToggle  – toggle Windows Terminal background image on/off
+  vim.api.nvim_create_user_command("WaifuBgToggle", function()
+    local on = winterm.toggle()
+    if on then
+      -- re-apply current mood immediately
+      local mood, _ = diags.get_mood(_cfg)
+      winterm.set_mood(mood)
+      vim.notify("Waifu background: ON", vim.log.levels.INFO)
+    else
+      vim.notify("Waifu background: OFF", vim.log.levels.INFO)
+    end
+  end, { desc = "Toggle Windows Terminal waifu background" })
 
   -- Initial render.
   -- When loaded with 'VeryLazy' or similar, VimEnter has already fired,

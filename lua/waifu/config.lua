@@ -37,6 +37,32 @@ M.defaults = {
 
   -- Show a border around the waifu window.
   border = "rounded",
+
+  -- ── Windows Terminal background integration ──────────────────────────────
+  -- Set wt_background = true to enable live background image switching.
+  wt_background = false,
+
+  -- Auto-detected via /mnt/c/Users/*/AppData/Local/Packages/Microsoft.WindowsTerminal*
+  -- Override if auto-detection fails.
+  wt_settings_path = nil,
+
+  -- Windows path to your mood images folder (use double backslashes in Lua strings).
+  -- Example: "C:\\neowaifu\\"
+  wt_images_win_dir = nil,
+
+  -- File extension of your mood images.
+  wt_image_ext = "jpg",
+
+  -- GUID of the Windows Terminal profile to update.
+  -- Find it in your settings.json next to the profile name you use.
+  wt_profile_guid = nil,
+
+  -- How opaque the background image is (0.0 = invisible, 1.0 = fully opaque).
+  wt_image_opacity = 0.15,
+
+  -- How the image fills the terminal window.
+  -- "uniformToFill" = fill & crop  |  "uniform" = fit with letterbox
+  wt_stretch_mode = "uniformToFill",
 }
 
 return M
