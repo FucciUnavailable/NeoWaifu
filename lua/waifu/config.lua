@@ -63,6 +63,23 @@ M.defaults = {
   -- How the image fills the terminal window.
   -- "uniformToFill" = fill & crop  |  "uniform" = fit with letterbox
   wt_stretch_mode = "uniformToFill",
+
+  -- ── AI chat ───────────────────────────────────────────────────────────────
+  -- OpenAI API key. Falls back to the OPENAI_API_KEY environment variable.
+  openai_key = nil,
+
+  -- Model to use for chat completions.
+  openai_model = "gpt-4o",
+
+  -- Base URL for the completions API (swap for Claude / local models).
+  openai_base_url = "https://api.openai.com/v1",
+
+  -- Width of the chat panel (columns).
+  chat_width = 48,
+
+  -- System prompt that defines Nya's personality.
+  -- nil = use the built-in VTuber coding assistant prompt.
+  chat_system_prompt = nil,
 }
 
 return M
