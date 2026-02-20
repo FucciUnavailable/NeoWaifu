@@ -53,11 +53,10 @@ M.defaults = {
 	-- File extension of your mood images.
 	wt_image_ext = "jpg",
 
-	-- Number of numbered images in your mood folder (e.g. 5 or 12).
+	-- Number of numbered images in your mood folder (e.g. 6 or 12).
 	-- 1 = happiest, N = angriest.
-	-- With 12: error count maps directly (0 errors → 1.jpg, 11+ → 12.jpg).
-	-- With 5 (or any other count): the 5 mood levels map proportionally.
-	wt_image_count = 5,
+	-- Error count maps directly: 0 errors → 1.jpg, 1 → 2.jpg, …, N-1+ → N.jpg
+	wt_image_count = 12,
 
 	-- GUID of the Windows Terminal profile to update.
 	-- Find it in your settings.json next to the profile name you use.
