@@ -40,7 +40,7 @@ M.defaults = {
 
 	-- ── Windows Terminal background integration ──────────────────────────────
 	-- Set wt_background = true to enable live background image switching.
-	wt_background = false,
+	wt_background = true,
 
 	-- Auto-detected via /mnt/c/Users/*/AppData/Local/Packages/Microsoft.WindowsTerminal*
 	-- Override if auto-detection fails.
@@ -52,6 +52,12 @@ M.defaults = {
 
 	-- File extension of your mood images.
 	wt_image_ext = "jpg",
+
+	-- Number of numbered images in your mood folder (e.g. 5 or 12).
+	-- 1 = happiest, N = angriest.
+	-- With 12: error count maps directly (0 errors → 1.jpg, 11+ → 12.jpg).
+	-- With 5 (or any other count): the 5 mood levels map proportionally.
+	wt_image_count = 5,
 
 	-- GUID of the Windows Terminal profile to update.
 	-- Find it in your settings.json next to the profile name you use.

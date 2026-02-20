@@ -22,7 +22,7 @@ local _timer = nil   -- uv timer for debouncing
 local function do_update()
   local mood, count = diags.get_mood(_cfg)
   display.update(mood, count)
-  winterm.set_mood(mood)
+  winterm.set_mood(mood, count)
 end
 
 -- Debounced wrapper – collapses rapid diagnostic bursts into a single render.
@@ -93,8 +93,8 @@ function M.setup(user_cfg)
     local on = winterm.toggle()
     if on then
       -- re-apply current mood immediately
-      local mood, _ = diags.get_mood(_cfg)
-      winterm.set_mood(mood)
+      local mood, count = diags.get_mood(_cfg)
+      winterm.set_mood(mood, count)
       vim.notify("Waifu background: ON", vim.log.levels.INFO)
     else
       vim.notify("Waifu background: OFF", vim.log.levels.INFO)
