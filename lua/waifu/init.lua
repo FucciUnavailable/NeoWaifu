@@ -13,6 +13,7 @@ local display   = require("waifu.display")
 local diags     = require("waifu.diagnostics")
 local winterm   = require("waifu.winterm")
 local chat      = require("waifu.chat")
+local voice     = require("waifu.voice")
 
 local _cfg   = {}
 local _timer = nil   -- uv timer for debouncing
@@ -47,7 +48,8 @@ function M.setup(user_cfg)
 
   display.setup(_cfg)
   winterm.setup(_cfg)
-  chat.setup(_cfg)
+  chat.setup(_cfg)   -- also calls voice.setup internally
+  voice.setup(_cfg)
 
   local group = vim.api.nvim_create_augroup("WaifuMood", { clear = true })
 
@@ -87,6 +89,11 @@ function M.setup(user_cfg)
   vim.api.nvim_create_user_command("WaifuChat", function()
     chat.toggle()
   end, { desc = "Toggle the Nya AI chat panel" })
+
+  -- :WaifuVoice  – toggle voice recording / transcription
+  vim.api.nvim_create_user_command("WaifuVoice", function()
+    chat.toggle_voice()
+  end, { desc = "Toggle voice recording for the Nya AI chat" })
 
   -- :WaifuBgToggle  – toggle Windows Terminal background image on/off
   vim.api.nvim_create_user_command("WaifuBgToggle", function()

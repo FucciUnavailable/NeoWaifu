@@ -85,6 +85,13 @@ M.defaults = {
 	-- System prompt that defines Nya's personality.
 	-- nil = use the built-in VTuber coding assistant prompt.
 	chat_system_prompt = nil,
+
+	-- ── Voice input ────────────────────────────────────────────────────────────
+	-- Enable voice recording keymaps (<C-r> in input window, v in main window).
+	voice_enabled = true,
+
+	-- Whisper model to use for transcription.
+	whisper_model = "whisper-1",
 }
 
 return M

@@ -7,6 +7,7 @@ local M = {}
 local animator = require("waifu.animator")
 local ai       = require("waifu.ai")
 local context  = require("waifu.context")
+local voice    = require("waifu.voice")
 
 -- ── module state ──────────────────────────────────────────────────────────────
 
@@ -150,6 +151,13 @@ local function setup_keymaps()
   map(main_buf, "n", "a",    "<Cmd>lua require('waifu.chat').focus_input()<CR>")
   map(main_buf, "n", "q",    "<Cmd>lua require('waifu.chat').close()<CR>")
   map(main_buf, "n", "<Esc>","<Cmd>lua require('waifu.chat').close()<CR>")
+
+  -- Voice input: <C-r> in input window (insert + normal), v in main window
+  if _cfg.voice_enabled then
+    map(input_buf, "i", "<C-r>", "<Cmd>lua require('waifu.chat').toggle_voice()<CR>")
+    map(input_buf, "n", "<C-r>", "<Cmd>lua require('waifu.chat').toggle_voice()<CR>")
+    map(main_buf,  "n", "v",     "<Cmd>lua require('waifu.chat').toggle_voice()<CR>")
+  end
 end
 
 -- ── window layout ─────────────────────────────────────────────────────────────
@@ -168,6 +176,7 @@ end
 ---@param cfg table  Full plugin config
 function M.setup(cfg)
   _cfg = cfg
+  voice.setup(cfg)
 end
 
 function M.is_open()
@@ -355,6 +364,49 @@ function M.submit()
       M.focus_input()
     end
   )
+end
+
+---Toggle voice recording.
+---  • Not recording → start recording (input title becomes " ● rec ").
+---  • Recording     → stop recording (title shows " ○ stt... " during transcription).
+---  • Transcription in flight → no-op (guard).
+function M.toggle_voice()
+  if not _cfg.voice_enabled then return end
+
+  -- Guard: ignore while transcription is running
+  if voice.is_transcribing() then return end
+
+  local function set_input_title(title)
+    if input_win and vim.api.nvim_win_is_valid(input_win) then
+      vim.api.nvim_win_set_config(input_win, { title = title, title_pos = "center" })
+    end
+  end
+
+  if not voice.is_recording() then
+    -- Make sure the chat panel is open
+    if not M.is_open() then M.open() end
+
+    set_input_title(" ● rec ")
+
+    voice.start(function(text)
+      -- on_done: called on main thread after transcription
+      set_input_title(" you ")
+
+      if text == "" then return end
+
+      -- Insert transcript into input buffer
+      if input_buf and vim.api.nvim_buf_is_valid(input_buf) then
+        vim.api.nvim_buf_set_lines(input_buf, 0, -1, false, { "> " .. text })
+      end
+
+      -- Focus input and position cursor at end
+      M.focus_input()
+    end)
+  else
+    -- Stop recording → on_exit will fire _transcribe → on_done
+    set_input_title(" ○ stt... ")
+    voice.stop()
+  end
 end
 
 return M

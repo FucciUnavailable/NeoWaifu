@@ -130,6 +130,49 @@ require("waifu").setup({
 | `:WaifuToggle` | Show / hide the waifu window |
 | `:WaifuShow`   | Force-show the window        |
 | `:WaifuHide`   | Force-hide the window        |
+| `:WaifuVoice`  | Toggle voice recording       |
+
+---
+
+## Voice Input
+
+Voice input records from the microphone with **ffmpeg** and transcribes with
+[Whisper](https://platform.openai.com/docs/guides/speech-to-text).
+No Python dependencies required.
+
+**One-time setup:**
+
+1. Install ffmpeg:
+
+```bash
+# Arch Linux
+sudo pacman -S ffmpeg
+
+# Ubuntu / Debian / WSL
+sudo apt install ffmpeg
+
+# macOS
+brew install ffmpeg
+```
+
+2. Set your OpenAI API key (used for both chat and Whisper transcription):
+
+```bash
+# Option A – environment variable (add to your shell profile)
+export OPENAI_API_KEY="sk-..."
+
+# Option B – .env file in the plugin root
+echo 'OPENAI_API_KEY=sk-...' > <plugin-root>/.env
+```
+
+**Keymaps** (inside the chat panel):
+
+| Key      | Mode          | Action                    |
+|----------|---------------|---------------------------|
+| `<C-r>`  | Insert/Normal | Start / stop recording    |
+| `v`      | Normal        | Start / stop recording    |
+
+While recording the input title shows `● rec`. When you stop, it switches to `○ stt...` during transcription, then the transcript appears in the input box ready to send.
 
 ---
 
