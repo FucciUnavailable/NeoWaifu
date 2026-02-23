@@ -426,8 +426,13 @@ function M.toggle_voice()
 				vim.api.nvim_buf_set_lines(input_buf, 0, -1, false, { "> " .. text })
 			end
 
-			-- Focus input and position cursor at end
-			M.focus_input()
+			-- Focus input with cursor at the start of the transcript (after "> ")
+			-- so the full text is visible rather than scrolled to the end
+			if input_win and vim.api.nvim_win_is_valid(input_win) then
+				vim.api.nvim_set_current_win(input_win)
+				vim.api.nvim_win_set_cursor(input_win, { 1, 2 })
+				vim.cmd("startinsert")
+			end
 		end)
 	else
 		-- Stop recording → on_exit will fire _transcribe → on_done
