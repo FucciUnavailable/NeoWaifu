@@ -7,6 +7,8 @@ local cfg = nil
 local buf  = nil  -- scratch buffer (reused)
 local win  = nil  -- floating window handle
 
+local ns = vim.api.nvim_create_namespace("waifu_hl")
+
 -- ── helpers ──────────────────────────────────────────────────────────────────
 
 ---Returns the absolute path of this file so we can locate images/ next to it.
@@ -71,6 +73,73 @@ local function win_pos(width, height)
   return math.max(0, row), math.max(0, col)
 end
 
+-- ── highlighting ─────────────────────────────────────────────────────────────
+
+local MOOD_HL = {
+  happy   = "WaifuHappy",
+  content = "WaifuContent",
+  neutral = "WaifuNeutral",
+  worried = "WaifuWorried",
+  angry   = "WaifuAngry",
+}
+
+local ACCENT_CHARS = { "♡", "★", "✧", "♪", "♫", "☆", "♩" }
+
+local function setup_highlights()
+  vim.api.nvim_set_hl(0, "WaifuFace",    { fg = "#ffb3c6" })                -- soft pink
+  vim.api.nvim_set_hl(0, "WaifuBody",    { fg = "#c9b3ff" })                -- lavender
+  vim.api.nvim_set_hl(0, "WaifuAccent",  { fg = "#ffd700", bold = true })   -- gold
+  vim.api.nvim_set_hl(0, "WaifuHappy",   { fg = "#a8e6a3", bold = true })   -- soft green
+  vim.api.nvim_set_hl(0, "WaifuContent", { fg = "#87ceeb" })                -- sky blue
+  vim.api.nvim_set_hl(0, "WaifuNeutral", { fg = "#d0d0d0" })                -- light gray
+  vim.api.nvim_set_hl(0, "WaifuWorried", { fg = "#ffb347" })                -- orange
+  vim.api.nvim_set_hl(0, "WaifuAngry",   { fg = "#ff6b6b", bold = true })   -- coral red
+end
+
+---Highlight accent characters (♡ ★ etc.) on a single line.
+local function hl_accents(b, line_idx, text)
+  for _, ch in ipairs(ACCENT_CHARS) do
+    local pos = 1
+    while true do
+      local s, e = string.find(text, ch, pos, true)
+      if not s then break end
+      -- s/e are 1-indexed inclusive; nvim wants 0-indexed, col_end exclusive
+      vim.api.nvim_buf_add_highlight(b, ns, "WaifuAccent", line_idx, s - 1, e)
+      pos = e + 1
+    end
+  end
+end
+
+---Apply zone + accent highlights after lines are written to the buffer.
+---@param b integer
+---@param lines string[]
+---@param mood string
+local function apply_highlights(b, lines, mood)
+  vim.api.nvim_buf_clear_namespace(b, ns, 0, -1)
+
+  local mood_hl = MOOD_HL[mood] or "WaifuNeutral"
+  local face_hl = (mood == "angry") and "WaifuAngry" or "WaifuFace"
+
+  for i, line in ipairs(lines) do
+    local idx = i - 1  -- nvim API is 0-indexed
+
+    if idx <= 4 then
+      vim.api.nvim_buf_add_highlight(b, ns, face_hl, idx, 0, -1)
+    elseif idx <= 10 then
+      vim.api.nvim_buf_add_highlight(b, ns, "WaifuBody", idx, 0, -1)
+    elseif idx >= 12 and idx <= 14 then
+      vim.api.nvim_buf_add_highlight(b, ns, mood_hl, idx, 0, -1)
+    end
+
+    hl_accents(b, idx, line)
+  end
+
+  -- Footer is always the last line
+  vim.api.nvim_buf_add_highlight(b, ns, mood_hl, #lines - 1, 0, -1)
+end
+
+-- ─────────────────────────────────────────────────────────────────────────────
+
 ---Ensure the scratch buffer exists and is valid.
 local function ensure_buf()
   if buf and vim.api.nvim_buf_is_valid(buf) then return end
@@ -87,6 +156,7 @@ end
 ---@param config table
 function M.setup(config)
   cfg = config
+  setup_highlights()
 end
 
 ---Update (or create) the floating window with the given mood and error count.
@@ -123,6 +193,8 @@ function M.update(mood, count)
   vim.bo[buf].modifiable = true
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
   vim.bo[buf].modifiable = false
+
+  apply_highlights(buf, lines, mood)
 
   local row, col = win_pos(W, H)
 
