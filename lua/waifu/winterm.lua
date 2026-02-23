@@ -4,8 +4,34 @@
 
 local M = {}
 
-local _cfg = nil
-local _enabled = true -- runtime toggle, independent of wt_background config flag
+local _cfg     = nil
+local _enabled = true  -- runtime toggle, independent of wt_background config flag
+local _img_count_cache = nil  -- lazily detected, reset on setup
+
+---Convert a Windows path to its WSL /mnt/... equivalent.
+---"C:\\foo\\bar\\" → "/mnt/c/foo/bar/"
+---@param win_path string
+---@return string
+local function win_to_wsl(win_path)
+  local p = win_path:gsub("\\", "/")
+  p = p:gsub("^(%a):/", function(drive)
+    return "/mnt/" .. drive:lower() .. "/"
+  end)
+  return p
+end
+
+---Count image files in the directory by inspecting the actual filesystem.
+---Result is cached for the lifetime of the session.
+---@param win_dir string  Windows-style path, e.g. "C:\\neowaifu\\final\\"
+---@param ext string      file extension without dot, e.g. "jpg"
+---@return integer
+local function detect_image_count(win_dir, ext)
+  if _img_count_cache then return _img_count_cache end
+  local wsl_dir = win_to_wsl(win_dir)
+  local files = vim.fn.glob(wsl_dir .. "*." .. ext, false, true)
+  _img_count_cache = math.max(#files, 1)
+  return _img_count_cache
+end
 
 ---Convert error count to an image number in 1..image_count.
 ---0 errors → 1.jpg, 1 error → 2.jpg, …, (image_count-1)+ errors → image_count.jpg
@@ -33,6 +59,7 @@ end
 ---@param cfg table  Full plugin config
 function M.setup(cfg)
 	_cfg = cfg
+	_img_count_cache = nil  -- reset so it re-detects if dir/ext changed
 end
 
 ---Update the Windows Terminal background image for the configured profile.
@@ -70,7 +97,7 @@ function M.set_mood(mood, count)
 		-- e.g.  "C:\\neowaifu\\"  in the config  =  C:\neowaifu\  at runtime.
 		local dir = _cfg.wt_images_win_dir or "C:\\neowaifu\\final\\"
 		local ext = _cfg.wt_image_ext or "jpg"
-		local img_count = _cfg.wt_image_count or 12
+		local img_count = detect_image_count(dir, ext)
 		local img_num = mood_to_number(count or 0, img_count)
 		local img = dir .. tostring(img_num) .. "." .. ext
 
